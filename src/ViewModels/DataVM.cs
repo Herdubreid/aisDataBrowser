@@ -1,32 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Text;
-using System.Threading.Tasks;
-using PropertyChanged;
-using ReactiveUI;
-using ICSharpCode.AvalonEdit.Document;
-using Pidgin;
+﻿using ICSharpCode.AvalonEdit.Document;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Pidgin;
+using static Pidgin.Parser;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Net;
+using System.IO;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Utils;
 
 namespace Celin
 {
-    [AddINotifyPropertyChangedInterface]
-    public class DataVM
+    public class DataColumn
     {
-        readonly string _message = "Enter command below and press the Run button...";
-        public string Message { get; set; }
-        public string Request { get; set; } = string.Empty;
-        public string Columns { get; set; } = string.Empty;
-        public TextDocument Code { get; set; } = new TextDocument();
-        public IEnumerable<JToken> ResultRows { get; set; }
-        public IEnumerable<DataGridColumn> ResultColumns { get; set; }
+        public string Alias { get; set; }
+        public string Description { get; set; }
+        public override string ToString()
+        {
+            return $"{Alias} {Description}";
+        }
+    }
+    public class DataVM : ReactiveObject
+    {
+        readonly string defaultMsg = "Enter command below and press any of the buttons on the left...";
+        readonly string submittingMsg = "Submitting the query...";
+        [Reactive] public TextDocument Code { get; set; } = new TextDocument();
+        [Reactive] public DataColumn SelectedAlias { get; set; }
+        [Reactive] public string Msg { get; set; }
+        [Reactive] public string Request { get; set; }
+        [Reactive] public bool Busy { get; set; }
+        [Reactive] public IEnumerable<JToken> ResultRows { get; set; }
+        [Reactive] public IEnumerable<DataGridColumn> ResultColumns { get; set; }
+        [Reactive] public IEnumerable<DataColumn> AvailableColumns { get; set; }
+        [Reactive] public int SelectedTabIndex { get; set; }
         public ReactiveCommand<System.Reactive.Unit, Task> Submit { get; }
+        public ReactiveCommand<System.Reactive.Unit, Task> SubmitDemo { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> GenerateRequest { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> NextTab { get; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> LastTab { get; }
         JToken FindKey(JArray token, string key)
         {
             foreach (var e in token)
@@ -109,10 +129,8 @@ namespace Celin
             }
             else
             {
-                var names = new List<string>();
                 foreach (var e in columns)
                 {
-                    names.Add(string.Format("{0}.{1}", e.Key.Split('_')));
                     var col = new DataGridTextColumn()
                     {
                         Header = e.Value,
@@ -126,43 +144,124 @@ namespace Celin
                 }
                 var rows = FindKey(result, "rowset");
                 ResultRows = rows.ToArray();
-                Columns = string.Join("\n", names);
             }
-            ResultColumns = cols;
+            ResultColumns = new ObservableCollection<DataGridColumn>(cols);
         }
+        void PopulateColumns(JObject result)
+        {
+            var columns = FindKey(result, "columns") as JObject;
+            if (columns is null) return;
 
+            var cols = new List<DataColumn>();
+            foreach (var e in columns)
+            {
+                cols.Add(new DataColumn()
+                {
+                    Alias = string.Format("{0}.{1}", e.Key.Split('_')),
+                    Description = e.Value.ToString()
+                });
+            }
+            AvailableColumns = cols;
+        }
+        void ResponseException(AIS.HttpWebException e)
+        {
+            if (e.HttpStatusCode == (HttpStatusCode)444)
+            {
+                MainVM.Instance.ActiveConnection.Server.AuthRequest = null;
+                Msg = "Expired!\nPliease Sign in again.";
+            }
+            else
+            {
+                Msg = e.Message;
+            }
+        }
         public DataVM()
         {
-            Message = _message;
+            Msg = defaultMsg;
+            var canSubmit = Observable
+                .CombineLatest(
+                this.WhenAnyValue(m => m.Busy),
+                MainVM.Instance.IsConnected)
+                .Select(c =>
+                {
+                    return !c[0] && c[1];
+                });
+
             Submit = ReactiveCommand.Create(async () =>
             {
-                var result = AIS.Data.DataRequest.Parser.Parse(Code.Text);
+                Busy = true;
+                var cmd = Code.Text.Replace('\n', ' ') + ';';
+                var result = AIS.Data.DataRequest.Parser.Before(Char(';')).Parse(cmd);
                 if (result.Success)
                 {
-                    result.Value.maxPageSize = "1000";
-                    Message = _message;
+                    result.Value.maxPageSize = MainVM.Instance.MaxReturnRowsItems.ElementAt(MainVM.Instance.MaxReturnRows);
+                    Msg = submittingMsg;
                     Request = JsonConvert.SerializeObject(result.Value, Formatting.Indented);
-                    var con = MainVM.Instance.ActiveConnection;
-                    if (con is null)
+                    try
                     {
-                        Message = "No active connection!";
+                        var response = await MainVM.Instance.ActiveConnection.Server.RequestAsync<JObject>(result.Value);
+                        PopulateResult(response);
+                        SelectedTabIndex = 1;
+                        Msg = "Check the results in the grid...";
                     }
-                    else
+                    catch (AIS.HttpWebException e)
                     {
-                        try
-                        {
-                            var response = await con.Server.RequestAsync<JObject>(result.Value);
-                            PopulateResult(response);
-                        }
-                        catch (AIS.HttpWebException e)
-                        {
-                            Message = e.Message;
-                        }
+                        ResponseException(e);
                     }
                 }
                 else
                 {
-                    Message = result.Error.ToString();
+                    Msg = result.Error.ToString();
+                    Request = "Failed!";
+                }
+                Busy = false;
+            }, canSubmit);
+            SubmitDemo = ReactiveCommand.Create(async () =>
+            {
+                Busy = true;
+                var result = AIS.Data.DataSubject.Parser.Parse(Code.Text);
+                if (result.Success)
+                {
+                    var request = new AIS.DatabrowserRequest()
+                    {
+                        targetName = result.Value.Name.ToUpper(),
+                        targetType = result.Value.Type,
+                        dataServiceType = "BROWSE",
+                        formServiceDemo = "TRUE"
+                    };
+                    Request = JsonConvert.SerializeObject(request, Formatting.Indented);
+                    try
+                    {
+                        Msg = submittingMsg;
+                        var response = await MainVM.Instance.ActiveConnection.Server.RequestAsync<JObject>(request);
+                        PopulateColumns(response);
+                    }
+                    catch (AIS.HttpWebException e)
+                    {
+                        ResponseException(e);
+                    }
+                }
+                else
+                {
+                    Msg = result.Error.ToString();
+                    Request = "Failed!";
+                }
+                Busy = false;
+            }, canSubmit);
+            GenerateRequest = ReactiveCommand.Create(() =>
+            {
+                Msg = defaultMsg;
+                var cmd = Code.Text.Replace('\n', ' ') + ';';
+                var result = AIS.Data.DataRequest.Parser.Before(Char(';')).Parse(cmd);
+                if (result.Success)
+                {
+                    result.Value.maxPageSize = MainVM.Instance.MaxReturnRowsItems.ElementAt(MainVM.Instance.MaxReturnRows);
+                    Request = JsonConvert.SerializeObject(result.Value, Formatting.Indented);
+                    SelectedTabIndex = 2;
+                }
+                else
+                {
+                    Msg = result.Error.ToString();
                     Request = "Failed!";
                 }
             });

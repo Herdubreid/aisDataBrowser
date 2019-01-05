@@ -1,51 +1,135 @@
-﻿using System;
-using System.IO;
+﻿using Dragablz;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Utils;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows.Controls;
-using PropertyChanged;
-using ReactiveUI;
-using Dragablz;
-using MaterialDesignThemes.Wpf;
-using System.Windows;
+using System.Threading.Tasks;
 
 namespace Celin
 {
-    [AddINotifyPropertyChangedInterface]
-    public class MainVM
+    public class DataSource
+    {
+        public string ObjectName { get; set; }
+        public string Description { get; set; }
+        public override string ToString()
+        {
+            return $"{ObjectName} {Description}";
+        }
+    }
+    public class MainVM : ReactiveObject
     {
         string Folder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Celin", "aisDataBrowser");
         readonly string sfname = "server.ctx";
         public static MainVM Instance { get; } = new MainVM();
+        [Reactive] public int MaxReturnRows { get; set; } = 2;
+        [Reactive] public Connection ActiveConnection { get; set; }
+        [Reactive] public TabCtrl SelectedTab { get; set; }
+        public IInterTabClient InterTabClient { get; } = new MainInterTabClient();
+        readonly ObservableAsPropertyHelper<AIS.AuthResponse> authResponse;
+        public AIS.AuthResponse AuthResponse { get => authResponse.Value; }
         public ReactiveCommand<Unit, Unit> NewDocument { get; }
+        public ReactiveCommand<Unit, Unit> OpenDocument { get; }
+        public ReactiveCommand<Unit, Unit> SaveDocument { get; }
+        public ReactiveCommand<Unit, Task> Connect { get; }
         public ReactiveCommand<Unit, Task> AddConnection { get; }
         public ReactiveCommand<Unit, Task> EditConnection { get; }
         public ReactiveCommand<Unit, Task> DeleteConnection { get; }
-        public ObservableCollection<HeaderedItemViewModel> Tabs { get; } = new ObservableCollection<HeaderedItemViewModel>();
         public ObservableCollection<Connection> Connections { get; }
-        public Connection ActiveConnection { get; set; }
+        public IEnumerable<string> MaxReturnRowsItems { get; } = new string[] { "10", "100", "500", "1000", "5000", "10000" };
+        public ObservableCollection<TabCtrl> Tabs { get; } = new ObservableCollection<TabCtrl>();
+        public IObservable<bool> IsConnected { get; set; }
+
+        async void GetDataSources()
+        {
+            var f9860 = await ActiveConnection.Server.RequestAsync<F9860.Response>(new F9860.Request());
+            /*DataSources = f9860.fs_DATABROWSE_F9860.data.gridData.rowset.Select(r =>
+            {
+                return new DataSource()
+                {
+                    ObjectName = r.F9860_OBNM,
+                    Description = r.F9860_MD
+                };
+            });*/
+        }
         public MainVM()
         {
             Connections = new ObservableCollection<Connection>(Connection.Load(Path.Combine(Folder, sfname)));
             ActiveConnection = Connections.Any() ? Connections.First() : null;
-            Tabs.Add(new HeaderedItemViewModel()
-            {
-                Header = "New Tab",
-                Content = new DataCtrl()
-            });
+
+            var connectionActive = this.WhenAny(m => m.ActiveConnection, v => v.Value != null);
+
+            authResponse = this
+                .WhenAnyValue(m => m.ActiveConnection.Server.AuthResponse)
+                .ToProperty(this, nameof(AuthResponse));
+
+            IsConnected = this
+                .WhenAnyValue(m => m.AuthResponse)
+                .Select(a =>
+                {
+                    return a != null;
+                });
+
             // Commands
             NewDocument = ReactiveCommand.Create(() =>
             {
-                Tabs.Add(new HeaderedItemViewModel()
+                Tabs.Add(new TabCtrl()
                 {
                     Header = string.Format("New Tab ({0})", Tabs.Count),
                     Content = new DataCtrl()
                 });
+
+                SelectedTab = Tabs.Last();
             });
+
+            OpenDocument = ReactiveCommand.Create(() =>
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
+                if (dlg.ShowDialog() == true)
+                {
+                    var content = new DataCtrl();
+                    if (content.Load(dlg.FileName))
+                    {
+                        Tabs.Add(new TabCtrl()
+                        {
+                            Header = dlg.SafeFileName,
+                            FileName = dlg.FileName,
+                            Content = content
+                        });
+
+                        SelectedTab = Tabs.Last();
+                    }
+                }
+            });
+
+            SaveDocument = ReactiveCommand.Create(() =>
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+                var content = (SelectedTab as TabCtrl).Content as DataCtrl;
+                if (dlg.ShowDialog() == true)
+                {
+                    if (content.Save(dlg.FileName))
+                    {
+                        SelectedTab.Header = dlg.SafeFileName;
+                    }
+                }
+            });
+
+            Connect = ReactiveCommand.Create(async () =>
+            {
+                var dlg = new ConnectionDlg(ActiveConnection);
+                var result = await DialogHost.Show(dlg);
+                this.RaisePropertyChanged("ActiveConnection");
+            },
+            this.WhenAny(m => m.ActiveConnection, v => v.Value != null));
             AddConnection = ReactiveCommand.Create(async () =>
             {
                 var dlg = new ConnectionDlg();
@@ -53,14 +137,10 @@ namespace Celin
                 if (result is Connection)
                 {
                     Connections.Add(result as Connection);
+                    ActiveConnection = result as Connection;
                 }
             });
-            EditConnection = ReactiveCommand.Create(async () =>
-            {
-                var dlg = new ConnectionDlg(ActiveConnection);
-                var result = await DialogHost.Show(dlg);
-            },
-            this.WhenAny(m => m.ActiveConnection, v => v.Value != null));
+
             DeleteConnection = ReactiveCommand.Create(async () =>
             {
                 var dlg = new ConfirmDlg(string.Format("Are you sure you want to delete '{0}'?", ActiveConnection.Id), "Delete");
@@ -68,9 +148,10 @@ namespace Celin
                 if (result)
                 {
                     Connections.Remove(ActiveConnection);
+                    ActiveConnection = Connections.Any() ? Connections.First() : null;
                 }
             },
-            this.WhenAny(m => m.ActiveConnection, v => v.Value != null));
+            connectionActive);
         }
         ~MainVM()
         {

@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Celin"
-        xmlns:ablz="clr-namespace:Dragablz;assembly=Dragablz"
+        xmlns:ablz="http://dragablz.net/winfx/xaml/dragablz"
         xmlns:ru="http://reactiveui.net"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
@@ -24,26 +24,15 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <!--
-            <Menu Grid.Row="0">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_Save">
-                        <MenuItem.Icon>
-                            <md:PackIcon Kind="ContentSave"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </MenuItem>
-            </Menu>
-            -->
             <ToolBarTray Grid.Row="1" Margin="2">
                 <ToolBar Style="{StaticResource MaterialDesignToolBar}" ClipToBounds="False">
-                    <Button x:Name="NewDocument" ToolTip="New">
+                    <Button x:Name="NewDocument" ToolTip="New (Ctrl-N)">
                         <md:PackIcon Kind="FileDocument"/>
                     </Button>
-                    <Button ToolTip="Save">
+                    <Button x:Name="SaveDocument" ToolTip="Save (Ctrl-S)">
                         <md:PackIcon Kind="ContentSave"/>
                     </Button>
-                    <Button ToolTip="Open">
+                    <Button x:Name="OpenDocument" ToolTip="Open (Ctrl-O)">
                         <md:PackIcon Kind="FolderOpen"/>
                     </Button>
                     <Separator/>
@@ -51,33 +40,43 @@
                             x:Name="Connections"
                             MinWidth="120"
                             Margin="16 0 0 0"
+                            DisplayMemberPath="Name"
                             Style="{StaticResource MaterialDesignFloatingHintComboBox}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Id}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <Button x:Name="Connect" ToolTip="Connect">
+                        <md:PackIcon Kind="LanConnect"/>
+                    </Button>
                     <Button x:Name="AddConnection" ToolTip="Add Connection">
                         <md:PackIcon Kind="Add"/>
-                    </Button>
-                    <Button x:Name="EditConnection" ToolTip="Edit Connection">
-                        <md:PackIcon Kind="Edit"/>
                     </Button>
                     <Button x:Name="DeleteConnection" ToolTip="Delete Connection">
                         <md:PackIcon Kind="Delete"/>
                     </Button>
+                    <Separator/>
+                    <ComboBox md:HintAssist.Hint="Return Rows"
+                              x:Name="MaxReturnRows" 
+                              MinWidth="60"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     <Separator/>
                 </ToolBar>
             </ToolBarTray>
             <ablz:TabablzControl
                 x:Name="TabContainer"
                 HeaderMemberPath="Header"
-                Grid.Row="2" ShowDefaultCloseButton="True">
+                FixedHeaderCount="1" AdjacentHeaderItemOffset="4"
+                Grid.Row="2" ShowDefaultCloseButton="True" ShowDefaultAddButton="False">
                 <ablz:TabablzControl.InterTabController>
-                    <ablz:InterTabController/>
+                    <ablz:InterTabController x:Name="TabController"/>
                 </ablz:TabablzControl.InterTabController>
             </ablz:TabablzControl>
         </Grid>
     </md:DialogHost>
 </ru:ReactiveWindow>
+
+    

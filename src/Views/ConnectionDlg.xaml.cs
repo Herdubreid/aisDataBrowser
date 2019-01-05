@@ -1,32 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Reactive.Linq;
+﻿using ReactiveUI;
 using System.Reactive.Disposables;
-using ReactiveUI;
-using MaterialDesignThemes.Wpf;
+using System.Windows;
 
 namespace Celin
 {
     /// <summary>
     /// Interaction logic for ConnectionDlg.xaml
     /// </summary>
-    public partial class ConnectionDlg : UserControl, IViewFor<ConnectionVM>
+    public partial class ConnectionDlg : ReactiveUserControl<ConnectionVM>
     {
-        object IViewFor.ViewModel { get => ViewModel; set => throw new NotImplementedException(); }
-        public ConnectionVM ViewModel { get; set; }
-
         public void InitVM(ConnectionVM vm)
         {
             ViewModel = vm;
@@ -48,6 +30,10 @@ namespace Celin
                 this.OneWayBind(ViewModel,
                     m => m.NewConnection,
                     v => v.Id.IsEnabled)
+                    .DisposeWith(d);
+                this.OneWayBind(ViewModel,
+                    m => m.NewConnection,
+                    v => v.BaseUrl.IsEnabled)
                     .DisposeWith(d);
 
                 // Fields use xaml binding

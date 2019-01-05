@@ -8,9 +8,15 @@ using Dragablz;
 
 namespace Celin
 {
-    public class MainInterTabClient : IInterLayoutClient
+    public class MainInterTabClient : IInterTabClient
     {
-        public INewTabHost<UIElement> GetNewHost(object partition, TabablzControl source)
+        public INewTabHost<Window> GetNewHost(IInterTabClient interTabClient, object partition, TabablzControl source)
+        {
+            var view = new ResultTab();
+            return new NewTabHost<ResultTab>(view, view.TabsContainer);
+        }
+
+        public TabEmptiedResponse TabEmptiedHandler(TabablzControl tabControl, Window window)
         {
             throw new NotImplementedException();
         }

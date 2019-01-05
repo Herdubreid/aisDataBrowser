@@ -1,35 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MaterialDesignThemes.Wpf;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Disposables;
-using System.Security;
-using System.ComponentModel;
-using ReactiveUI;
-using PropertyChanged;
-using MaterialDesignThemes.Wpf;
 
 namespace Celin
 {
-    [AddINotifyPropertyChangedInterface]
-    public class ConnectionVM : IDataErrorInfo
+    public class ConnectionVM : ReactiveObject, IDataErrorInfo
     {
         Connection _edit = null;
         bool _exist = false;
-        CancellationTokenSource cancelRequest = new CancellationTokenSource();
+        CancellationTokenSource cancelRequest { get; set; }
+        [Reactive]public string Id { get; set; }
+        [Reactive]public string BaseUrl { get; set; }
+        [Reactive]public string User { get; set; }
+        [Reactive]public string Msg { get; set; }
+        [Reactive]public bool CanConnect { get; set; }
+        [Reactive]public bool Busy { get; set; }
+        public bool NewConnection { get => _edit is null; }
         public ReactiveCommand<PasswordBox, Task> Connect { get; }
         public ReactiveCommand<Unit, Unit> CancelRequest { get; }
-        public string Id { get; set; } = string.Empty;
-        public string BaseUrl { get; set; } = string.Empty;
-        public string User { get; set; } = string.Empty;
-        public bool NewConnection { get => _edit is null; }
-        public bool CanConnect { get; private set; } = false;
-        public bool Busy { get; set; } = false;
 
         public string Error => throw new NotImplementedException();
 
@@ -79,30 +75,28 @@ namespace Celin
 
         public ConnectionVM()
         {
-            var canConnect = this.WhenAnyValue(
-                m => m.Id, m => m.BaseUrl, m => m.User,
-                (id, baseUrl, user) =>
-                !string.IsNullOrWhiteSpace(id) &&
-                !string.IsNullOrWhiteSpace(baseUrl) &&
-                !string.IsNullOrWhiteSpace(user))
-                .DistinctUntilChanged();
-
             Connect = ReactiveCommand.Create<PasswordBox, Task>(async pb =>
             {
                 Busy = true;
+                Msg = string.Empty;
                 var host = _edit is null ? new Connection(Id, BaseUrl) : _edit;
                 host.Server.AuthRequest.username = User;
                 host.Server.AuthRequest.password = pb.Password;
                 host.Server.AuthRequest.requiredCapabilities = "dataServiceAggregation";
                 try
                 {
+                    cancelRequest = new CancellationTokenSource();
                     await host.Server.AuthenticateAsync(cancelRequest);
-                    DialogHost.CloseDialogCommand.Execute(_edit, null);
+                    DialogHost.CloseDialogCommand.Execute(host, null);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Msg = e.Message;
                 }
-                Busy = false;
+                finally
+                {
+                    Busy = false;
+                }
             });
             CancelRequest = ReactiveCommand.Create(() =>
             {
