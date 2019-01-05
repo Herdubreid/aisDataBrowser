@@ -100,7 +100,7 @@ namespace Celin
                 this.InputBindings.Add(new KeyBinding(ViewModel.SaveDocument, Key.S, ModifierKeys.Control));
 
                 // Insert the Default Tab
-                ViewModel.Tabs.Add(new TabCtrl()
+                ViewModel.Tabs.Add(new HeaderedItemViewModel()
                 {
                     Header = "Default",
                     Content = new DataCtrl()

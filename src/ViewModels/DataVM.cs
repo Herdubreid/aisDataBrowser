@@ -182,10 +182,7 @@ namespace Celin
                 .CombineLatest(
                 this.WhenAnyValue(m => m.Busy),
                 MainVM.Instance.IsConnected)
-                .Select(c =>
-                {
-                    return !c[0] && c[1];
-                });
+                .Select(c => !c[0] && c[1]);
 
             Submit = ReactiveCommand.Create(async () =>
             {

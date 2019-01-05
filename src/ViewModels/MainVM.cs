@@ -27,12 +27,14 @@ namespace Celin
     }
     public class MainVM : ReactiveObject
     {
+        static readonly string FILE_FILTER = "Celin's Query Language (*.cql)|*.cql|All Files (*.*)|*.*";
+
         string Folder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Celin", "aisDataBrowser");
         readonly string sfname = "server.ctx";
         public static MainVM Instance { get; } = new MainVM();
         [Reactive] public int MaxReturnRows { get; set; } = 2;
         [Reactive] public Connection ActiveConnection { get; set; }
-        [Reactive] public TabCtrl SelectedTab { get; set; }
+        [Reactive] public HeaderedItemViewModel SelectedTab { get; set; }
         public IInterTabClient InterTabClient { get; } = new MainInterTabClient();
         readonly ObservableAsPropertyHelper<AIS.AuthResponse> authResponse;
         public AIS.AuthResponse AuthResponse { get => authResponse.Value; }
@@ -45,7 +47,7 @@ namespace Celin
         public ReactiveCommand<Unit, Task> DeleteConnection { get; }
         public ObservableCollection<Connection> Connections { get; }
         public IEnumerable<string> MaxReturnRowsItems { get; } = new string[] { "10", "100", "500", "1000", "5000", "10000" };
-        public ObservableCollection<TabCtrl> Tabs { get; } = new ObservableCollection<TabCtrl>();
+        public ObservableCollection<HeaderedItemViewModel> Tabs { get; } = new ObservableCollection<HeaderedItemViewModel>();
         public IObservable<bool> IsConnected { get; set; }
 
         async void GetDataSources()
@@ -81,7 +83,7 @@ namespace Celin
             // Commands
             NewDocument = ReactiveCommand.Create(() =>
             {
-                Tabs.Add(new TabCtrl()
+                Tabs.Add(new HeaderedItemViewModel()
                 {
                     Header = string.Format("New Tab ({0})", Tabs.Count),
                     Content = new DataCtrl()
@@ -93,15 +95,15 @@ namespace Celin
             OpenDocument = ReactiveCommand.Create(() =>
             {
                 OpenFileDialog dlg = new OpenFileDialog();
+                dlg.Filter = FILE_FILTER;
                 if (dlg.ShowDialog() == true)
                 {
                     var content = new DataCtrl();
                     if (content.Load(dlg.FileName))
                     {
-                        Tabs.Add(new TabCtrl()
+                        Tabs.Add(new HeaderedItemViewModel()
                         {
                             Header = dlg.SafeFileName,
-                            FileName = dlg.FileName,
                             Content = content
                         });
 
@@ -112,14 +114,22 @@ namespace Celin
 
             SaveDocument = ReactiveCommand.Create(() =>
             {
-                SaveFileDialog dlg = new SaveFileDialog();
-                var content = (SelectedTab as TabCtrl).Content as DataCtrl;
-                if (dlg.ShowDialog() == true)
+                var content = (SelectedTab as HeaderedItemViewModel).Content as DataCtrl;
+                if (content.Editor.Document.FileName is null)
                 {
-                    if (content.Save(dlg.FileName))
+                    SaveFileDialog dlg = new SaveFileDialog();
+                    dlg.Filter = FILE_FILTER;
+                    if (dlg.ShowDialog() == true)
                     {
-                        SelectedTab.Header = dlg.SafeFileName;
+                        if (content.Save(dlg.FileName))
+                        {
+                            SelectedTab.Header = dlg.SafeFileName;
+                        }
                     }
+                }
+                else
+                {
+                    content.Save(content.Editor.Document.FileName);
                 }
             });
 

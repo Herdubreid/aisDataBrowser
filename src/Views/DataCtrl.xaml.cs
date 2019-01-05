@@ -76,14 +76,14 @@ namespace Celin
                     v => v.TabContainer.SelectedIndex)
                     .DisposeWith(d);
 
-                ViewModel
+                /*ViewModel
                 .WhenAnyValue(m => m.SelectedAlias)
                 .Where(c => c != null)
                 .Subscribe(c =>
                 {
                     Editor.Document.Insert(Editor.CaretOffset, c.Alias);
                     Editor.Focus();
-                });
+                });*/
 
                 ViewModel
                 .WhenAnyValue(m => m.ResultColumns)
