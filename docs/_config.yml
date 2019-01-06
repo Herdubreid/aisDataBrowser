@@ -1,21 +1,11 @@
 title: AIS Data Browser
-
 author: Finnur Bragason
-
 email: fbragason@outlook.com
-
 description: > # this means to ignore newlines until "aux_links:"
-
   Browse Oracle E1 tables and business views with AIS  
 
-
-
 aux_links:
-
   "Visit on Github":
-
   - "//github.com/Herdubreid/aisDataBrowser"
-
-
 
 remote_theme: pmarsceill/just-the-docs
