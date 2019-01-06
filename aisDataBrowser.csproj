@@ -274,6 +274,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="aisDataBrowser_TemporaryKey.pfx" />
+    <None Include="docs\_config.yml" />
     <None Include="NLog.config" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
