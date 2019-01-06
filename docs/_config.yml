@@ -1,6 +1,4 @@
-remote_theme: minima
+remote_theme: jekyll/minima
 
 github_username: Herdubreid
 linkedin_unsername: fin_bragason
-
-theme: jekyll-theme-minimal
