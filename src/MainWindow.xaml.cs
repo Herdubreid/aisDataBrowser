@@ -28,13 +28,6 @@ namespace Celin
         {
             InitializeComponent();
 
-            // Insert the Default Tab
-            /*ViewModel.Tabs.Add(new HeaderedItemViewModel()
-            {
-                Header = "Default",
-                Content = new DataCtrl()
-            });*/
-
             this.WhenActivated(d =>
             {
                 ViewModel = MainVM.Instance;
@@ -93,11 +86,16 @@ namespace Celin
                     m => m.DeleteConnection,
                     v => v.DeleteConnection)
                     .DisposeWith(d);
+                this.BindCommand(ViewModel,
+                    m => m.OpenHelp,
+                    v => v.OpenHelp)
+                    .DisposeWith(d);
 
                 // Key Binding
                 this.InputBindings.Add(new KeyBinding(ViewModel.NewDocument, Key.N, ModifierKeys.Control));
                 this.InputBindings.Add(new KeyBinding(ViewModel.OpenDocument, Key.O, ModifierKeys.Control));
                 this.InputBindings.Add(new KeyBinding(ViewModel.SaveDocument, Key.S, ModifierKeys.Control));
+                this.InputBindings.Add(new KeyBinding(ViewModel.OpenHelp, Key.F1, ModifierKeys.None));
 
                 // Insert the Default Tab
                 ViewModel.Tabs.Add(new HeaderedItemViewModel()

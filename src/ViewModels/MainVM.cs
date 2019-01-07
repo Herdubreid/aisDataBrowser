@@ -8,6 +8,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -45,6 +46,7 @@ namespace Celin
         public ReactiveCommand<Unit, Task> AddConnection { get; }
         public ReactiveCommand<Unit, Task> EditConnection { get; }
         public ReactiveCommand<Unit, Task> DeleteConnection { get; }
+        public ReactiveCommand<Unit, Unit> OpenHelp { get; }
         public ObservableCollection<Connection> Connections { get; }
         public IEnumerable<string> MaxReturnRowsItems { get; } = new string[] { "10", "100", "500", "1000", "5000", "10000" };
         public ObservableCollection<HeaderedItemViewModel> Tabs { get; } = new ObservableCollection<HeaderedItemViewModel>();
@@ -162,6 +164,11 @@ namespace Celin
                 }
             },
             connectionActive);
+
+            OpenHelp = ReactiveCommand.Create(() =>
+            {
+                Process.Start("https://herdubreid.github.io/aisDataBrowser/");
+            });
         }
         ~MainVM()
         {

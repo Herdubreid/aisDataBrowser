@@ -64,6 +64,9 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                     <Separator/>
+                    <Button x:Name="OpenHelp" ToolTip="View On-line Help">
+                        <md:PackIcon Kind="Help"/>
+                    </Button>
                 </ToolBar>
             </ToolBarTray>
             <ablz:TabablzControl

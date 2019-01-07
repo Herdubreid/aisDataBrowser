@@ -49,7 +49,7 @@
                         CommandParameter="{StaticResource False}"
                         Style="{DynamicResource MaterialDesignFlatButton}">Cancel</Button>
             </Grid>
-            <TextBlock Grid.Row="5" Text="{Binding Path=Message}" Foreground="Red"/>
+            <TextBlock Grid.Row="5" Text="{Binding Path=Msg}" Foreground="Red"/>
         </Grid>
         <Grid Margin="60" x:Name="Progress">
             <Grid.RowDefinitions>
