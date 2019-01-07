@@ -11,7 +11,9 @@ Requires AIS Server Release 9.2.0.2 or higher.
 
 ### Installation
 
+Download the latest `setup.zip` from [Github](https://github.com/Herdubreid/aisDataBrowser/releases), unzip to a temporary location and run `setup.exe`.
 
+__Note:__ The application is not signed and will warn about 'Unknown Publisher' during install.
 
 ### Usage
 
@@ -19,7 +21,7 @@ Once connected to an AIS Server, enter a query command and submit it.
 
 ![query](images/query.png)
 
-View the results are in a data grid.
+View the results in a data grid.
 
 ![result](images/result.png)
 
