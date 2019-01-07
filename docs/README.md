@@ -13,7 +13,7 @@ Requires AIS Server Release 9.2.0.2 or higher.
 
 
 
-### Usages
+### Usage
 
 Once connected to an AIS Server, enter a query command and submit it.
 
