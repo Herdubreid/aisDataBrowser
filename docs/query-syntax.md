@@ -6,7 +6,7 @@ nav_order: 3
 # Syntax Diagram
 
 <pre>
-(f|v)<i>Subject</i> [<i>Alias-List</i>|<i>Aggregation</i>] [<i>Condition</i>]
+(f|v)<i>Subject</i> [<i>Alias-List</i>|<i>Aggregation</i>] (<i>Condition</i>)
 </pre>
 
 ### _Subject_
@@ -29,7 +29,7 @@ Submitting a _Subject_ only request will fetch all fields of up to _Maximum Rows
 
 ## _Alias-List_
 
-An _Alias-List_ is a comma separated list of table's or view's aliases to list.  The table prefix can be ignored for unique aliases, like in tables for example.
+An _Alias-List_ is a comma separated list of table's or view's aliases to list.  The table prefix can be ignored if the alias is unique, like in tables for example.
 
 A query can have either _Alias-List_ or _Aggregation_.
 
@@ -68,10 +68,10 @@ In addition there are two sequence functions:
 The form of an aggregate is:
 
 <pre>
-[<i>Aggreate-Function</i>(<i>Alias-List</i>)...]
+<i>Aggreate-Function</i>(<i>Alias-List</i>)
 </pre>
 
-__Note:__ The functions _Alias-List_ __must__ be prefixed with the table.
+__Note:__ Items in the _Alias-List_ __must__ be prefixed with the table.
 
 ### Examples
 
