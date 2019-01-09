@@ -275,6 +275,7 @@
     </EmbeddedResource>
     <None Include="aisDataBrowser_TemporaryKey.pfx" />
     <None Include="docs\acknowledgment.md" />
+    <None Include="docs\issues.md" />
     <None Include="docs\_config.yml" />
     <None Include="NLog.config" />
     <None Include="packages.config" />

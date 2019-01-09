@@ -1,6 +1,6 @@
 ﻿---
 title: Acknowledgment
-nav_order: 4
+nav_order: 5
 ---
 
 A facinating aspect of software development is its altruistic nature.  An enormous wealth has truly befallen to some individuals in the industry due to proprietary safeguarding.  But I also can't think of an industry where it's common practice to publish one's creative work under a [license](https://opensource.org/licenses/MIT) that permits anyone to use it as they please -- just don't try to sue the author for any mishaps.
