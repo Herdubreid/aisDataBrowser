@@ -310,15 +310,15 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\benjamin-hodgson\pidgin\Pidgin\Pidgin.csproj">
+    <ProjectReference Include="..\..\benjamin-hodgson\pidgin\Pidgin\Pidgin.csproj">
       <Project>{e016c263-a821-4066-b13b-221e6a9c74e5}</Project>
       <Name>Pidgin</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Herdubreid\Celin.AIS.Data\Celin.AIS.Data.csproj">
+    <ProjectReference Include="..\Celin.AIS.Data\Celin.AIS.Data.csproj">
       <Project>{92291be1-a94d-4bfb-a4ca-662bb0d22d4a}</Project>
       <Name>Celin.AIS.Data</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Herdubreid\Celin.AIS\Celin.AIS.csproj">
+    <ProjectReference Include="..\Celin.AIS\Celin.AIS.csproj">
       <Project>{53474ea2-1c5c-480c-ba71-657574ad4034}</Project>
       <Name>Celin.AIS</Name>
     </ProjectReference>

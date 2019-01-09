@@ -7,7 +7,7 @@ A facinating aspect of software development is its altruistic nature.  An enormo
 
 aisDataBrowser is developed with arguably the most sophisticated tools around -- or at least the most expensive.  I can't imagine how much money Microsoft has poured into .Net, but I would be surprised if anyone had spent more money on a single software library.
 
-Add to the pile what's been spent on Oracle's E1 over its 30+ year lifespan and the sum of money that has taken to make aisDataBrowser a possibility must be quite staggering!
+Add to the pile what's been spent on Oracle's E1 over its 20+ year lifespan and the sum of money that has taken to make aisDataBrowser a possibility must be quite staggering!
 
 But the might of Microsoft and Oracle is not quite enough.  Without a couple of open-source libraries, putting this together would have been a lot harder -- if not impossible.
 

@@ -2,7 +2,7 @@
 
 A data browser application for Oracle E1 based on AIS.
 
-### Requirments
+### Requirements
 
 Runs on Windows 7 or Server 2008 R2 SP1 or later versions.  
 Requires .Net Framework 4.7 (automatically installed if not present).

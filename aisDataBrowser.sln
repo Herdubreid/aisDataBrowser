@@ -5,11 +5,11 @@ VisualStudioVersion = 15.0.28010.2019
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aisDataBrowser", "aisDataBrowser.csproj", "{8B0E6F62-4518-4792-A0E7-9CF9C6CCE6CA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Celin.AIS.Data", "..\Herdubreid\Celin.AIS.Data\Celin.AIS.Data.csproj", "{92291BE1-A94D-4BFB-A4CA-662BB0D22D4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Celin.AIS.Data", "..\Celin.AIS.Data\Celin.AIS.Data.csproj", "{92291BE1-A94D-4BFB-A4CA-662BB0D22D4A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Celin.AIS", "..\Herdubreid\Celin.AIS\Celin.AIS.csproj", "{53474EA2-1C5C-480C-BA71-657574AD4034}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Celin.AIS", "..\Celin.AIS\Celin.AIS.csproj", "{53474EA2-1C5C-480C-BA71-657574AD4034}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pidgin", "..\benjamin-hodgson\pidgin\Pidgin\Pidgin.csproj", "{E016C263-A821-4066-B13B-221E6A9C74E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pidgin", "..\..\benjamin-hodgson\pidgin\Pidgin\Pidgin.csproj", "{E016C263-A821-4066-B13B-221E6A9C74E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
