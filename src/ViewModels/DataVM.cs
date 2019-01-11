@@ -37,6 +37,7 @@ namespace Celin
         [Reactive] public DataColumn SelectedAlias { get; set; }
         [Reactive] public string Msg { get; set; }
         [Reactive] public string Request { get; set; }
+        [Reactive] public string Response { get; set; }
         [Reactive] public bool Busy { get; set; }
         [Reactive] public IEnumerable<JToken> ResultRows { get; set; }
         [Reactive] public IEnumerable<DataGridColumn> ResultColumns { get; set; }
@@ -167,8 +168,7 @@ namespace Celin
         {
             if (e.HttpStatusCode == (HttpStatusCode)444)
             {
-                MainVM.Instance.ActiveConnection.Server.AuthRequest = null;
-                Msg = "Expired!\nPliease Sign in again.";
+                Msg = "Expired!\nPlease Sign in again.";
             }
             else
             {
@@ -187,7 +187,7 @@ namespace Celin
             Submit = ReactiveCommand.Create(async () =>
             {
                 Busy = true;
-                var cmd = Code.Text.Replace('\n', ' ') + ';';
+                var cmd = Code.Text.Replace('\n', ' ').TrimEnd(' ') + ';';
                 var result = AIS.Data.DataRequest.Parser.Before(Char(';')).Parse(cmd);
                 if (result.Success)
                 {
@@ -197,6 +197,7 @@ namespace Celin
                     try
                     {
                         var response = await MainVM.Instance.ActiveConnection.Server.RequestAsync<JObject>(result.Value);
+                        Response = JsonConvert.SerializeObject(response, Formatting.Indented);
                         PopulateResult(response);
                         SelectedTabIndex = 1;
                         Msg = "Check the results in the grid...";

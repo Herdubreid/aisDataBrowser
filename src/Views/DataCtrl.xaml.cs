@@ -102,6 +102,10 @@ namespace Celin
                     m => m.Request,
                     v => v.Request.Text)
                     .DisposeWith(d);
+                this.OneWayBind(ViewModel,
+                    m => m.Response,
+                    v => v.Response.Text)
+                    .DisposeWith(d);
 
                 // Commands
                 this.BindCommand(ViewModel,
