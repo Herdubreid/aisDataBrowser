@@ -17,6 +17,7 @@ using System.Net;
 using System.IO;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Utils;
+using System.Text.RegularExpressions;
 
 namespace Celin
 {
@@ -187,7 +188,7 @@ namespace Celin
             Submit = ReactiveCommand.Create(async () =>
             {
                 Busy = true;
-                var cmd = Code.Text.Replace('\n', ' ').TrimEnd(' ') + ';';
+                var cmd = Regex.Replace(Code.Text, @"\t|\n|\r", string.Empty).Trim(' ') + ';';
                 var result = AIS.Data.DataRequest.Parser.Before(Char(';')).Parse(cmd);
                 if (result.Success)
                 {
@@ -249,7 +250,7 @@ namespace Celin
             GenerateRequest = ReactiveCommand.Create(() =>
             {
                 Msg = defaultMsg;
-                var cmd = Code.Text.Replace('\n', ' ') + ';';
+                var cmd = Regex.Replace(Code.Text, @"\t|\n|\r", string.Empty).Trim(' ') + ';';
                 var result = AIS.Data.DataRequest.Parser.Before(Char(';')).Parse(cmd);
                 if (result.Success)
                 {
