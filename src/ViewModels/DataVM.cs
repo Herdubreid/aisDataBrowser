@@ -1,23 +1,20 @@
 ﻿using ICSharpCode.AvalonEdit.Document;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using ICSharpCode.AvalonEdit.Utils;
 using Pidgin;
-using static Pidgin.Parser;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Reactive.Linq;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Net;
-using System.IO;
-using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Utils;
-using System.Text.RegularExpressions;
+using static Pidgin.Parser;
 
 namespace Celin
 {
@@ -40,7 +37,7 @@ namespace Celin
         [Reactive] public string Request { get; set; }
         [Reactive] public string Response { get; set; }
         [Reactive] public bool Busy { get; set; }
-        [Reactive] public IEnumerable<JToken> ResultRows { get; set; }
+        [Reactive] public IEnumerable<JsonElement> ResultRows { get; set; }
         [Reactive] public IEnumerable<DataGridColumn> ResultColumns { get; set; }
         [Reactive] public IEnumerable<DataColumn> AvailableColumns { get; set; }
         [Reactive] public int SelectedTabIndex { get; set; }

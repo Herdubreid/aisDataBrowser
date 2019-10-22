@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 namespace Celin
 {
     public class Response<T> where T : AIS.Request
     {
         public T Request { get; set; }
-        public JObject Result { get; set; }
+        public JsonElement Result { get; set; }
         public string ResultKey
         {
             get
