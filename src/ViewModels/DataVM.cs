@@ -46,6 +46,28 @@ namespace Celin
         public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> GenerateRequest { get; }
         public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> NextTab { get; }
         public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> LastTab { get; }
+        static bool FindProperty(string property, JsonElement element, out JsonElement found)
+        {
+            if (element.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var el in element.EnumerateArray())
+                {
+                    if (FindProperty(property, el, out found)) return true;
+                }
+            }
+            if (element.ValueKind == JsonValueKind.Object)
+            {
+                if (element.TryGetProperty(property, out found)) return true;
+                {
+                    foreach (var el in element.EnumerateObject())
+                    {
+                        if (FindProperty(property, el.Value, out found)) return true;
+                    }
+                }
+            }
+            found = new JsonElement();
+            return false;
+        }
         JToken FindKey(JArray token, string key)
         {
             foreach (var e in token)
